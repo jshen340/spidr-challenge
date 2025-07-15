@@ -22,6 +22,9 @@ function App() {
   });
 
   const [focusedField, setFocusedField] = useState<string>("");
+  const [errors, setErrors] = useState<{ phone?: string; spidrPin?: string }>(
+    {}
+  );
 
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, "");
@@ -76,12 +79,22 @@ function App() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Remove dashes for digit count
+    const phoneDigits = formData.phone.replace(/[^0-9]/g, "");
+    const pinDigits = formData.spidrPin.replace(/[^0-9]/g, "");
+    const newErrors: { phone?: string; spidrPin?: string } = {};
+    if (phoneDigits.length !== 10) {
+      newErrors.phone = "Phone number must be exactly 10 digits.";
+    }
+    if (pinDigits.length !== 16) {
+      newErrors.spidrPin = "Spidr PIN must be exactly 16 digits.";
+    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      return;
+    }
     console.log("Form Data Submitted:", formData);
-
-    // Show success message
     alert("Interest submitted! Check the console for your data.");
-
-    // Clear form data
     setFormData({
       firstName: "",
       lastName: "",
@@ -90,6 +103,7 @@ function App() {
       costGuess: "",
       spidrPin: "",
     });
+    setErrors({});
   };
 
   return (
@@ -166,6 +180,8 @@ function App() {
             onChange={(value) => handleInputChange("phone", value)}
             onFocus={() => setFocusedField("phone")}
             onBlur={() => setFocusedField("")}
+            error={errors.phone}
+            maxLength={12}
           />
 
           <div className="relative">
@@ -196,6 +212,8 @@ function App() {
             onChange={(value) => handleInputChange("spidrPin", value)}
             onFocus={() => setFocusedField("spidrPin")}
             onBlur={() => setFocusedField("")}
+            error={errors.spidrPin}
+            maxLength={19}
           />
 
           <button
